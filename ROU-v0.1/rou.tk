@@ -81,10 +81,13 @@ source $PATH/rc-rou.tk
 source $PATH/rou-snd.tk
 source $PATH/rou-rcv.tk
 source $PATH/rou-svg.tk
+source $PATH/rou-routage.tk
 
 ## Ajout des zones crees, avec option d'affichage
 APG_int_addzone rcv "Réceptions" 1
 APG_int_addzone snd "Emissions" 1
+APG_int_addzone snap "Snapshoot" 1
+
 
 ## Affichage des zones
 APG_int_displayzones
