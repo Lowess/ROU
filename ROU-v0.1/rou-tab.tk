@@ -1,0 +1,118 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+
+#    rou
+#    an airplug compatible program
+#    author: Florian DAMBRINE
+#    license type: free of charge license for academic and research purpose
+#    see license.txt
+### MODULE ROU ####################################################
+ 
+### VARIABLES OF THE MODULE ###################################################
+ 
+# Current routing table
+set ROU_tab_routingTable $HLG_rc_routingTable
+
+### GRAPHICAL AREA OF THE MODULE ##############################################
+ 
+###############################################################################
+ 
+### COMMAND LINE OPTION #######################################################
+foreach option $APG_lstargs {
+    set name [lindex [split $option "="] 0]
+    set value [lindex [split $option "="] 1]
+ 
+    switch -- $name {
+		--hlg-hini {
+			if { $value == "" } {
+				APG_vrb_dispwarning "option $name found without argument ; ignored"
+			} else {
+				set HLG_lam_h $value
+				APG_vrb_dispnotif "option $option found; initial Lamport's clock value=$value"
+			}
+		}
+    }
+}
+###############################################################################
+ 
+ 
+### PROCEDURES OF THE MODULE ##################################################
+
+
+#-- Procedure ROU_tab_displayRoutingTable ---------------------------------------#
+# Action : display a given routing table                                         #
+# Input  : the routing table to display                                          #
+# Output : nothing                                                               #
+#--------------------------------------------------------------------------------#
+
+proc ROU_tab_displayRoutingTable { paramRoutingTable } {
+	puts "-----------"
+	foreach route $paramRoutingTable {
+		puts $route
+	}
+	puts "-----------"
+}
+
+#-- Procedure ROU_tab_getRoute --------------------------------------------------#
+# Action : return the route to follow to reach the given destination	         #
+# Input  : destination to reach                                                  #
+# Output : the route to follow                                                   #
+#--------------------------------------------------------------------------------#
+
+proc ROU_tab_getRoute { paramDestination } {
+	set nextHop ""
+	foreach route $::ROU_tab_routingTable {
+		#Check if it's the given route
+		if { [lindex $route 0] == $paramDestination } { 
+			set nextHop [lindex $route 1]
+		}
+	}
+	#Return the next hop
+	return $nextHop
+}
+
+#-- Procedure ROU_tab_setRoute ---------------------------------------------------#
+# Action : update the routing table when a shortest path is given
+#		   take in account a new route											 #
+# Input  : new routingTable given by an other ROU app                            #
+# Output : nothing                                                               #
+#--------------------------------------------------------------------------------#
+
+proc ROU_tab_setRoute { newRoutingTable } {
+	#Iterates on the remote table
+	foreach updatedRoute $newRoutingTable {
+		set paramDestination [lindex $updatedRoute 0]
+		set paramNextHop [lindex $updatedRoute 1]
+		set paramDistance [incr 1 [lindex $updatedRoute 2]]
+		set flag "false"
+		foreach routeToUpdate $::ROU_tab_routingTable {
+			#Check if it's the right route to update
+			if { [lindex $routeToUpdate 0] == $paramDestination } { 
+				set flag "true"
+				#Set the distance with a +1
+				set currentDistance [lindex $routeToUpdate 2]
+				
+				#If I have a better route, I update
+				if { $paramDistance < $currentDistance } {
+					#paramDestination == currentDestination
+					list updatedRoute { $paramDestination }
+					#Update the next hop
+					lset updatedRoute 1 $paramNextHop
+					#Update the distance
+					lset updatedRoute 2 $paramDistance
+					
+					lset ::routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
+				}
+				#Otherwise... I keep my route
+			}
+		}
+		#A new route was given so I have to add it
+		if { $flag == "false" } {
+			list updatedRoute { $paramDestination $paramNextHop $paramDistance }
+			lappend ::routingTable $updatedRoute
+		}
+	}
+}
+
+###############################################################################

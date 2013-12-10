@@ -8,3 +8,6 @@
 # Mnemonique pour le header ROU, contenant le nom de l'application qui a emis
 # le message transporte.
 set ROU_rc_mnemoapp "approu"
+
+#Create the default routing table
+list ROU_rc_routingTable {$::APP $::APP 0}
