@@ -4,7 +4,7 @@ list routingTable {}
 
 lappend routingTable { A A 0 }
 lappend routingTable { B B 1 }
-lappend routingTable { C B 3 }
+lappend routingTable { C B 5 }
 
 list paramTable {}
 
