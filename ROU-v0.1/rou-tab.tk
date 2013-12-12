@@ -14,6 +14,8 @@ exec wish "$0" "$@"
 # Current routing table
 set ROU_tab_routingTable $HLG_rc_routingTable
 
+###############################################################################
+
 ### GRAPHICAL AREA OF THE MODULE ##############################################
  
 ###############################################################################
@@ -35,8 +37,7 @@ foreach option $APG_lstargs {
     }
 }
 ###############################################################################
- 
- 
+
 ### PROCEDURES OF THE MODULE ##################################################
 
 
@@ -60,16 +61,62 @@ proc ROU_tab_displayRoutingTable { paramRoutingTable } {
 # Output : the route to follow                                                   #
 #--------------------------------------------------------------------------------#
 
-proc ROU_tab_getRoute { paramDestination } {
+proc ROU_tab_getRoute { destination } {
 	set nextHop ""
 	foreach route $::ROU_tab_routingTable {
 		#Check if it's the given route
-		if { [lindex $route 0] == $paramDestination } { 
+		if { [lindex $route 0] == $destination } { 
 			set nextHop [lindex $route 1]
 		}
 	}
 	#Return the next hop
 	return $nextHop
+}
+
+#-- Procedure ROU_tab_removeRoute -----------------------------------------------#
+# Action : remove the route according to the given destination	                 #
+# Input  : destination to remove from the routing table                          #
+# Output : Nothing                                                               #
+#--------------------------------------------------------------------------------#
+
+proc ROU_tab_removeRoute { routeToRemove } {
+	foreach route $::ROU_tab_routingTable {
+		#Check if it's the given route
+		if { [lindex $route 0] == $routeToRemove } { 
+			#Get the index of the line
+			set index [lsearch $::ROU_tab_routingTable $route]
+			#Remove the index from the routing table
+			set ::ROU_tab_routingTable [lreplace $::ROU_tab_routingTable $index $index]
+		}
+	}
+}
+
+#-- Procedure ROU_tab_incrTimer -------------------------------------------------#
+# Action : increment all timers in the routing table                             #
+# Input  : Nothing													             #
+# Output : Nothing                                                               #
+#--------------------------------------------------------------------------------#
+
+proc ROU_tab_incrTimer { } {
+	#Contains the new routing table
+	list updatedRoutingTable {}
+	foreach route $::ROU_tab_routingTable {
+		#Get the route 
+		set update $route
+		#Get the current timer
+		set newTimer [lindex $update 3]
+		#Increment the timer
+		incr newTimer
+		#Modify the route with the incremented timer
+		lset update 3 $newTimer
+		#puts $update
+		#Get the index of the line
+		set index [lsearch $::ROU_tab_routingTable $route]
+		#Increment the timer and update the table
+		lappend updatedRoutingTable $update
+	}
+	#Update the routingTable
+	set ::ROU_tab_routingTable $updatedRoutingTable 
 }
 
 #-- Procedure ROU_tab_setRoute ---------------------------------------------------#
@@ -101,16 +148,22 @@ proc ROU_tab_setRoute { newRoutingTable } {
 					lset updatedRoute 1 $paramNextHop
 					#Update the distance
 					lset updatedRoute 2 $paramDistance
-					
-					lset ::routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
+					#Update the timer
+					lset updatedRoute 3 0
+					#Update the routing table
+					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
+				} else {
+					#Otherwise... it resets the timer
+					list updatedRoute $routeToUpdate
+					lset updatedRoute 3 0
+					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute 
 				}
-				#Otherwise... I keep my route
 			}
 		}
 		#A new route was given so I have to add it
 		if { $flag == "false" } {
 			list updatedRoute { $paramDestination $paramNextHop $paramDistance }
-			lappend ::routingTable $updatedRoute
+			lappend ::ROU_tab_routingTable $updatedRoute
 		}
 	}
 }

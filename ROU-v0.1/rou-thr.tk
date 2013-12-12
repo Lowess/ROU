@@ -1,0 +1,43 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+
+#    rou
+#    an airplug compatible program
+#    author: Florian DAMBRINE
+#    license type: free of charge license for academic and research purpose
+#    see license.txt
+### MODULE ROU ####################################################
+ 
+### VARIABLES OF THE MODULE ###################################################
+ 
+###############################################################################
+
+### GRAPHICAL AREA OF THE MODULE ##############################################
+ 
+###############################################################################
+ 
+### COMMAND LINE OPTION #######################################################
+foreach option $APG_lstargs {
+    set name [lindex [split $option "="] 0]
+    set value [lindex [split $option "="] 1]
+ 
+    switch -- $name {
+		--hlg-hini {
+			if { $value == "" } {
+				APG_vrb_dispwarning "option $name found without argument ; ignored"
+			} else {
+				set HLG_lam_h $value
+				APG_vrb_dispnotif "option $option found; initial Lamport's clock value=$value"
+			}
+		}
+    }
+}
+###############################################################################
+ 
+ 
+### PROCEDURES OF THE MODULE ##################################################
+
+
+###############################################################################
+

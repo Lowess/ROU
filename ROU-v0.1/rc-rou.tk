@@ -15,4 +15,21 @@ list ROU_rc_routingTable {$::APP $::APP 0}
 set ROU_rc_mnemoTypeMessage "routage"
 
 set ROU_rc_mnemoDest "destinataire"
+
 set ROU_rc_mnemoTableRoutage "TableRoutage"
+
+#Define a thread to send routing table periodicaly
+# TO DO
+set ROU_rc_threadSendRoutingTable [thread::create {
+    proc sendRoutingTable { } {
+		#Send routing table each 5 seconds 
+		utimer 5
+		
+		set header [APG_msg_createmsg $::ROU_rcv_mnemoapp $who]
+
+		set ::ROU_snd_msg $what
+		set ::ROU_snd_app $who
+
+    }
+    thread::wait
+}]
