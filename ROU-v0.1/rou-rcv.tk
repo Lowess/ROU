@@ -58,6 +58,15 @@ foreach option $APG_lstargs {
 
 ### PROCEDURES DU MODULE ######################################################
 
+
+# Procedure to unserialize the route table
+proc ROU_unserialize { paramChaine_a_deSerialiser } {
+
+	set res [split $paramChaine_a_deSerialiser ","]
+	return $res
+
+}
+
 #-- Procedure APG_receive_whatwho --------------------------------------------#
 # Action : gere la reception de messages                                      #
 # Remarq : surcharge de LIBAPGTK                                              #
@@ -81,35 +90,41 @@ proc APG_receive_whatwho { what who } {
 
 						set typemsg [APG_msg_splitstr what $::ROU_rc_mnemoTypeMessage]
 						set tableroutage [APG_msg_splitstr what $::ROU_rc_mnemoTableRoutage]
+
+						ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 						
-						APG_vrb_dispdebug "test" $typemsg
+						#APG_vrb_dispdebug "test" $typemsg
 						# if it's only 2 app ROU who exchange theirs tables
 						if { $typemsg == "routage" } {
-
+							set table_routage_recu [ROU_unserialize $tableroutage]
 							# we try to update the existing route (or create some new one)
-							ROU_tab_displayRoutingTable $tableroutage
-							ROU_setRout $tableroutage
+							ROU_tab_displayRoutingTable $table_routage_recu
+							ROU_tab_setRoute $table_routage_recu
+
+							ROU_tab_displayRoutingTable $::ROU_tab_routingTable
+
+							set test [ROU_tab_getRoute 
 
 						# else , it's will be some package to transfert to an other 
 						# node
-						} else { 
-							# we extract the destination of the packet
-							set dest [APG_msg_splitstr what $::ROU_rc_mnemoDest]
-							
-							# if the destination is the current node.
-							if { $dest == $::APP } {
-
-								#we send the packet to the correct local application
-								#ENVOYER packet
-
-							# else, we send it to an other location.
-							} else {
-
-								set nextHopeApp [ROU_getRout $dest]
-								ROU_snd_send $msg $nextHopeApp
-
-							}
-						}
+#						} else { 
+#							# we extract the destination of the packet
+##							set dest [APG_msg_splitstr what $::ROU_rc_mnemoDest]
+#####							
+	#						# if the destination is the current node.
+	#						if { $dest == $::APP } {
+#
+#								#we send the packet to the correct local application
+#								#ENVOYER packet
+#
+#							# else, we send it to an other location.
+#							} else {
+#
+#								set nextHopeApp [ROU_getRout $dest]
+#								ROU_snd_send $msg $nextHopeApp
+##
+#							}
+#						}
 				} \
 				default {
 	

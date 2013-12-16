@@ -1,0 +1,100 @@
+package require math
+#package require dict
+#    hlg
+#    an airplug compatible program
+#    author: Bertrand Ducourthial AT utc.fr, newapp from NET v0.31
+#    license type: free of charge license for academic and research purpose
+#    see license.txt
+### MODULE LAMPORT'S CLOCK ####################################################
+ 
+### VARIABLES OF THE MODULE ###################################################
+# Current value of the local Lamport's clock
+
+set HLG_snp_hsauv 0
+
+###############################################################################
+ 
+ 
+### GRAPHICAL AREA OF THE MODULE ##############################################
+
+## zone du module lam
+labelframe .snap -pady 2 -padx 2 \
+    -text "Snapshoot \[$APP, ident = $APG_ident\]"  -fg $APG_int_coltitle
+
+label .snap.t -text "Local Lamport's clock save = "
+label .snap.h -textvariable HLG_snp_hsauv -width 4 -anchor w
+pack .snap.t .snap.h -side left
+
+button .snap.btauto -text "Sauvegarde" \
+        -activebackground $APG_int_colbutton \
+        -foreground $APG_int_colbutton \
+        -font $APG_int_fnbutton \
+        -width 10 \
+        -command Snp_save
+
+### affichage des sous-zones de la zone snd
+pack .snap.btauto 
+
+###############################################################################
+ 
+ 
+### COMMAND LINE OPTION #######################################################
+foreach option $APG_lstargs {
+    set name [lindex [split $option "="] 0]
+    set value [lindex [split $option "="] 1]
+ 
+    switch -- $name {
+	--hlg-hini {
+	    if { $value == "" } {
+		APG_vrb_dispwarning "option $name found without argument ; ignored"
+	    } else {
+		set HLG_snp_hsauv $value
+		APG_vrb_dispnotif "option $option found; initial Lamport's clock value=$value"
+            }
+	}
+    }
+}
+###############################################################################
+ 
+ 
+### PROCEDURES OF THE MODULE ##################################################
+#-- Procedure HLG_lam_incrandget ---------------------------------------------#
+
+#############
+# Action: Se déclenche quand on click sur le bouton sauvegarde. Si c'est le cas 
+# on mets conserve la derniere valeur de l'horloge local.
+#
+#############
+
+
+proc ROU_serialize { paramChaine_aSerialiser } {
+    set SerializeChaine ""
+    foreach route $paramChaine_aSerialiser {
+
+        append SerializeChaine $route "," 
+    }
+    set resultat [regsub "\,$" $SerializeChaine ""]
+    return $resultat
+
+}
+
+proc Snp_save { } {
+        
+        APG_vrb_dispdebug "on save" "APG_receive_whatwho"
+
+        # On ajoute un header contenant un "flag" pour signifier qu'on fait une sauvegarde
+        set header [APG_msg_createmsg $::ROU_rc_mnemoapp $::APP ]
+        set msg [APG_msg_addmsg header $::ROU_rc_mnemoDest "a"]
+        
+        set malist [list [list "a" "b" 1 0] [list "a" "c" 2 0] [list "a" "d" 5 0]]
+        set test [ROU_serialize $malist]
+
+        set msg2 [APG_msg_addmsg msg $::ROU_rc_mnemoTableRoutage $test]
+
+        set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoTypeMessage "routage"]
+        # Adding the header to the received message.
+        #set msg [APG_msg_concatemsg $header]
+        ROU_snd_send $msg2 $::APP
+
+}
+###############################################################################
