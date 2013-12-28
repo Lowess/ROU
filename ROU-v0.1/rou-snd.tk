@@ -39,7 +39,7 @@ proc ROU_snd_send { what who } {
 		# Mise a jour de l'interface du module snd.
 		set ::ROU_snd_msg $what
 		set ::ROU_snd_app $who
-
+		#APG_vrb_dispdebug "msg envoyer de $::APP vers $who"
 		# Emission proprement dite.
 		APG_send_whatwho $what $who
 }

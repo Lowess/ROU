@@ -5,11 +5,11 @@ package require math
 #    author: Bertrand Ducourthial AT utc.fr, newapp from NET v0.31
 #    license type: free of charge license for academic and research purpose
 #    see license.txt
-### MODULE LAMPORT'S CLOCK ####################################################
+### MODULE ROUTAGE ####################################################
  
 ### VARIABLES OF THE MODULE ###################################################
-# Current value of the local Lamport's clock
 
+#A SUPP (pour les tests)
 set HLG_snp_hsauv 0
 
 ###############################################################################
@@ -17,6 +17,8 @@ set HLG_snp_hsauv 0
  
 ### GRAPHICAL AREA OF THE MODULE ##############################################
 
+
+#A SUPP (pour les tests)
 ## zone du module lam
 labelframe .snap -pady 2 -padx 2 \
     -text "Snapshoot \[$APP, ident = $APG_ident\]"  -fg $APG_int_coltitle
@@ -58,14 +60,10 @@ foreach option $APG_lstargs {
  
  
 ### PROCEDURES OF THE MODULE ##################################################
-#-- Procedure HLG_lam_incrandget ---------------------------------------------#
-
-#############
-# Action: Se déclenche quand on click sur le bouton sauvegarde. Si c'est le cas 
-# on mets conserve la derniere valeur de l'horloge local.
+#-- Procedure ROU_serialize ---------------------------------------------#
+# Allow to serialize list as a chaine before sending it
 #
 #############
-
 
 proc ROU_serialize { paramChaine_aSerialiser } {
     set SerializeChaine ""
@@ -78,23 +76,24 @@ proc ROU_serialize { paramChaine_aSerialiser } {
 
 }
 
+
+#A SUPP (pour les tests)
 proc Snp_save { } {
         
         APG_vrb_dispdebug "on save" "APG_receive_whatwho"
 
         # On ajoute un header contenant un "flag" pour signifier qu'on fait une sauvegarde
         set header [APG_msg_createmsg $::ROU_rc_mnemoapp $::APP ]
-        set msg [APG_msg_addmsg header $::ROU_rc_mnemoDest "a"]
-        
+
         set malist [list [list "a" "b" 1 0] [list "a" "c" 2 0] [list "a" "d" 5 0]]
         set test [ROU_serialize $malist]
 
-        set msg2 [APG_msg_addmsg msg $::ROU_rc_mnemoTableRoutage $test]
+        set msg2 [APG_msg_addmsg header $::ROU_rc_mnemoTableRoutage $test]
 
         set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoTypeMessage "routage"]
         # Adding the header to the received message.
         #set msg [APG_msg_concatemsg $header]
-        ROU_snd_send $msg2 $::APP
+        ROU_snd_send $msg3 $::APP
 
 }
 ###############################################################################

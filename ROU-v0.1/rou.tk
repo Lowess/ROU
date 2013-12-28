@@ -105,7 +105,7 @@ proc ROU_start { } {
 		APG_vrb_dispnotif "Starting ROU" "ROU_start" 3
 
 		# abonnement a l'application locale BAS
-		APG_begin_lch "BAS"
+		APG_begin_lch "APPTEST"
 		# abonnement a l'application distance ROU
 		APG_begin_air $::APP
 }
