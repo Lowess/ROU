@@ -71,7 +71,7 @@ proc APG_receive_whatwho { what who } {
     set ::ROU_rcv_app $who
 
 	# Traitement different selon l'emetteur.
-    switch -- $::ROU_rcv_app \
+    switch -- $::ROU_rcv_app! \
 				$::APP {
 						# Récuperation of the sender and the payload
 						set app [APG_msg_splitstr who $::ROU_rcv_mnemoapp]
@@ -93,7 +93,7 @@ proc APG_receive_whatwho { what who } {
 							# we try to update the existing route (or create some new one)
 							#ROU_tab_displayRoutingTable $table_routage_recu								
 
-							ROU_tab_setRoute $table_routage_recu
+							ROU_tab_setRoute $app $table_routage_recu
 
 							ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 

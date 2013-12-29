@@ -47,11 +47,18 @@ foreach option $APG_lstargs {
 #--------------------------------------------------------------------------------#
 
 proc ROU_tab_periodicalSend { period } {
+	puts "priodical send"
+	#Serialized the routing table
 	set serialized [ROU_fmt_serialize $::ROU_tab_routingTable]
-	set msg [APG_msg_createmsg $::ROU_rc_mnemoTableRoutage $serialized]
+	#Set the name of the sender
+	set msg [APG_msg_createmsg $::ROU_rc_mnemoapp $::APG_ident]
+	#Set the type of message
 	set msg2 [APG_msg_addmsg msg $::ROU_rc_mnemoTypeMessage "routage"]
-	set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoapp $::APG_ident]
+	#Set the real payload
+	set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoTableRoutage $serialized]
+	#Send the message
 	ROU_snd_send $msg3 $::APP
+	#Repeat the function each period
 	after $period ROU_tab_periodicalSend $period
 }
 
@@ -115,24 +122,24 @@ proc ROU_tab_incrTimer { period } {
 	#Contains the new routing table
 	set updatedRoutingTable [list ]
 	foreach route $::ROU_tab_routingTable {
-			#Get the route 
-			set update $route
-			puts $route
-			#Get the current timer
-			set newTimer [lindex $update 3]
+		#Get the route 
+		set update $route
+		puts $route
+		#Get the current timer
+		set newTimer [lindex $update 3]
 		#Increment the timer if it's not the current site
 		if { [lindex $route 0] != $::APG_ident } { 
 			#Increment the timer
 			incr newTimer
 		}
-			#Modify the route with the incremented timer
-			lset update 3 $newTimer
-			#puts $update
-			#Get the index of the line
-			set index [lsearch $::ROU_tab_routingTable $route]
-			#Increment the timer and update the table
-			lappend updatedRoutingTable $update
-			puts $updatedRoutingTable
+		#Modify the route with the incremented timer
+		lset update 3 $newTimer
+		#puts $update
+		#Get the index of the line
+		set index [lsearch $::ROU_tab_routingTable $route]
+		#Increment the timer and update the table
+		lappend updatedRoutingTable $update
+		puts $updatedRoutingTable
 	}
 	#Update the routingTable
 	set ::ROU_tab_routingTable $updatedRoutingTable 
@@ -142,15 +149,15 @@ proc ROU_tab_incrTimer { period } {
 #-- Procedure ROU_tab_setRoute --------------------------------------------------#
 # Action : update the routing table when a shortest path is given
 #		   take in account a new route											 #
+# Input  : name of the sender						                             #
 # Input  : new routingTable given by an other ROU app                            #
 # Output : nothing                                                               #
 #--------------------------------------------------------------------------------#
 
-proc ROU_tab_setRoute { newRoutingTable } {
+proc ROU_tab_setRoute { app newRoutingTable } {
 	#Iterates on the remote table
 	foreach updatedRoute $newRoutingTable {
 		set paramDestination [lindex $updatedRoute 0]
-		set paramNextHop [lindex $updatedRoute 1]
 		set paramDistance [lindex $updatedRoute 2]
 		incr paramDistance
 		set flag "false"
@@ -168,7 +175,7 @@ proc ROU_tab_setRoute { newRoutingTable } {
 					#paramDestination == currentDestination
 					set updatedRoute [list $paramDestination]
 					#Update the next hop
-					lset updatedRoute 1 $paramNextHop
+					lset updatedRoute 1 $app
 					#Update the distance
 					lset updatedRoute 2 $paramDistance
 					#Update the timer
@@ -185,7 +192,7 @@ proc ROU_tab_setRoute { newRoutingTable } {
 		}
 		#A new route was given so I have to add it
 		if { $flag == "false" } {
-			set updatedRoute [list $paramDestination $paramNextHop $paramDistance 0]
+			set updatedRoute [list $paramDestination $app $paramDistance 0]
 			lappend ::ROU_tab_routingTable $updatedRoute
 		}
 	}

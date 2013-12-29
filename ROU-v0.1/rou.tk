@@ -132,9 +132,10 @@ APG_init
 set ROU_periodKeepAlive $ROU_rc_periodKeepAlive
 set ROU_periodSendRoutingTable $ROU_rc_periodSendRoutingTable
 
-
 #Start updating routing table each period of time
 ROU_tab_incrTimer $ROU_periodKeepAlive
 
-#Start sending periodicaly my routing table 
-ROU_tab_periodicalSend $ROU_periodSendRoutingTable
+#~ if { $APG_ident == "A" } {
+	#Start sending periodicaly my routing table 
+	ROU_tab_periodicalSend $ROU_periodSendRoutingTable
+#~ }
