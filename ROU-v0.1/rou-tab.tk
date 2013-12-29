@@ -12,12 +12,13 @@ exec wish "$0" "$@"
 ### VARIABLES OF THE MODULE ###################################################
  
 # Current routing table
-#<<<<<<< Updated upstream
-#set ROU_tab_routingTable $ROU_rc_routingTable
+set ROU_tab_routingTable $ROU_rc_routingTable
 
-#=======
-set ROU_tab_routingTable [list [list "a" "b" 1 0] [list "a" "c" 2 0] [list "a" "d" 5 0]]
-#>>>>>>> Stashed changes
+set ROU_tab_mnemoapp $::ROU_rc_mnemoapp
+set ROU_tab_mnemoTypeMessage $::ROU_rc_mnemoTypeMessage
+set ROU_tab_mnemoID $::ROU_rc_mnemoID
+set ROU_tab_mnemoTableRoutage $::ROU_rc_mnemoTableRoutage
+
 ###############################################################################
 
 ### GRAPHICAL AREA OF THE MODULE ##############################################
@@ -51,19 +52,19 @@ foreach option $APG_lstargs {
 #--------------------------------------------------------------------------------#
 
 proc ROU_tab_periodicalSend { period } {
-	puts "priodical send"
 	#Serialized the routing table
 	set serialized [ROU_fmt_serialize $::ROU_tab_routingTable]
 	#Set the name of the sender
-	set msg [APG_msg_createmsg $::ROU_rc_mnemoapp $::APG_ident]
+	set msg [APG_msg_createmsg $::ROU_tab_mnemoapp $::APP]
 	#Set the type of message
-	set msg2 [APG_msg_addmsg msg $::ROU_rc_mnemoTypeMessage "routage"]
+	set msg2 [APG_msg_addmsg msg $::ROU_tab_mnemoTypeMessage "routage"]
+	#Set the type of message
+	set msg3 [APG_msg_addmsg msg2 $::ROU_tab_mnemoID $::APG_ident]
 	#Set the real payload
-	set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoTableRoutage $serialized]
+	set msg4 [APG_msg_addmsg msg3 $::ROU_tab_mnemoTableRoutage $serialized]
 	#Send the message
-	ROU_snd_send $msg3 $::APP
+	ROU_snd_send $msg4 $::APP
 
-	APG_vrb_dispdebug "On est sur $msg3 "
 	after $period ROU_tab_periodicalSend $period
 }
 
@@ -74,11 +75,11 @@ proc ROU_tab_periodicalSend { period } {
 #--------------------------------------------------------------------------------#
 
 proc ROU_tab_displayRoutingTable { paramRoutingTable } {
-	puts "-----------"
+	APG_vrb_dispdebug "-----------"
 	foreach route $paramRoutingTable {
-		puts $route
+		APG_vrb_dispdebug $route
 	}
-	puts "-----------"
+	APG_vrb_dispdebug "-----------"
 }
 
 #-- Procedure ROU_tab_getRoute --------------------------------------------------#
@@ -129,7 +130,6 @@ proc ROU_tab_incrTimer { period } {
 	foreach route $::ROU_tab_routingTable {
 		#Get the route 
 		set update $route
-		puts $route
 		#Get the current timer
 		set newTimer [lindex $update 3]
 		#Increment the timer if it's not the current site
@@ -139,12 +139,10 @@ proc ROU_tab_incrTimer { period } {
 		}
 		#Modify the route with the incremented timer
 		lset update 3 $newTimer
-		#puts $update
 		#Get the index of the line
 		set index [lsearch $::ROU_tab_routingTable $route]
 		#Increment the timer and update the table
 		lappend updatedRoutingTable $update
-		puts $updatedRoutingTable
 	}
 	#Update the routingTable
 	set ::ROU_tab_routingTable $updatedRoutingTable 

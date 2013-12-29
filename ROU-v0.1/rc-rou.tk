@@ -24,6 +24,8 @@ set ROU_rc_mnemoNextHope "NextHope"
 
 set ROU_rc_mnemoTableRoutage "TableRoutage"
 
+set ROU_rc_mnemoID "ID"
+
 ########################################################################
 # Variables
 ########################################################################
