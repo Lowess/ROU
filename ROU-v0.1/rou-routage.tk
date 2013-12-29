@@ -60,22 +60,6 @@ foreach option $APG_lstargs {
  
  
 ### PROCEDURES OF THE MODULE ##################################################
-#-- Procedure ROU_serialize ---------------------------------------------#
-# Allow to serialize list as a chaine before sending it
-#
-#############
-
-proc ROU_serialize { paramChaine_aSerialiser } {
-    set SerializeChaine ""
-    foreach route $paramChaine_aSerialiser {
-
-        append SerializeChaine $route "," 
-    }
-    set resultat [regsub "\,$" $SerializeChaine ""]
-    return $resultat
-
-}
-
 
 #A SUPP (pour les tests)
 proc Snp_save { } {
@@ -86,7 +70,7 @@ proc Snp_save { } {
         set header [APG_msg_createmsg $::ROU_rc_mnemoapp $::APP ]
 
         set malist [list [list "a" "b" 1 0] [list "a" "c" 2 0] [list "a" "d" 5 0]]
-        set test [ROU_serialize $malist]
+        set test [ROU_fmt_serialize $malist]
 
         set msg2 [APG_msg_addmsg header $::ROU_rc_mnemoTableRoutage $test]
 

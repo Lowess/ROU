@@ -58,15 +58,6 @@ foreach option $APG_lstargs {
 
 ### PROCEDURES DU MODULE ######################################################
 
-
-# Procedure to unserialize the route table
-proc ROU_unserialize { paramChaine_a_deSerialiser } {
-
-	set res [split $paramChaine_a_deSerialiser ","]
-	return $res
-
-}
-
 #-- Procedure APG_receive_whatwho --------------------------------------------#
 # Action : gere la reception de messages                                      #
 # Remarq : surcharge de LIBAPGTK                                              #
@@ -82,11 +73,9 @@ proc APG_receive_whatwho { what who } {
 	# Traitement different selon l'emetteur.
     switch -- $::ROU_rcv_app \
 				$::APP {
-
 						# Récuperation of the sender and the payload
 						set app [APG_msg_splitstr who $::ROU_rcv_mnemoapp]
 						set msg [APG_msg_endstr what $::ROU_rcv_mnemoapp true]
-						
 						# Recuperation of the type of message and the routage table (if exist)
 						set typemsg [APG_msg_splitstr what $::ROU_rc_mnemoTypeMessage]
 						set tableroutage [APG_msg_splitstr what $::ROU_rc_mnemoTableRoutage]
@@ -95,14 +84,14 @@ proc APG_receive_whatwho { what who } {
 						# incoming message, if not, we don't do anything, if yes, we look for the next hope)
 						set nodeExpected [APG_msg_splitstr what $::ROU_rc_mnemoNextHope]
 
-#A SUPP
+						#A SUPP
 						APG_vrb_dispdebug "On est sur $::APP"
 
 						# if it's only 2 app ROU who exchange theirs tables
 						if { $typemsg == "routage" } {
-							set table_routage_recu [ROU_unserialize $tableroutage]
+							set table_routage_recu [ROU_fmt_unserialize $tableroutage]
 							# we try to update the existing route (or create some new one)
-							ROU_tab_displayRoutingTable $table_routage_recu								
+							#ROU_tab_displayRoutingTable $table_routage_recu								
 
 							ROU_tab_setRoute $table_routage_recu
 
@@ -124,8 +113,6 @@ proc APG_receive_whatwho { what who } {
 								set nextMessage [APG_msg_addmsg msg $::ROU_rc_mnemoNextHope $destnode]
 								APG_vrb_dispdebug "Viens de l'appli local $::APP Envoi au dest node $destnode"
 								ROU_snd_send $nextMessage $::APP
-
-
 							} else {
 
 								# else, we look if the nodeExpected match the current node. If not we don't do anything

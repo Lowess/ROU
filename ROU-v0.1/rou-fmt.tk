@@ -1,0 +1,67 @@
+package require math
+#    rou
+#    an airplug compatible program
+#    author: Bertrand Ducourthial AT utc.fr, newapp from NET v0.31
+#    license type: free of charge license for academic and research purpose
+#    see license.txt
+### MODULE ROUTAGE #####################################################
+ 
+### VARIABLES OF THE MODULE ############################################
+
+######################################################################## 
+ 
+### GRAPHICAL AREA OF THE MODULE #######################################
+
+########################################################################
+  
+### COMMAND LINE OPTION #######################################################
+foreach option $APG_lstargs {
+    set name [lindex [split $option "="] 0]
+    set value [lindex [split $option "="] 1]
+ 
+    switch -- $name {
+	--hlg-hini {
+	    if { $value == "" } {
+		APG_vrb_dispwarning "option $name found without argument ; ignored"
+	    } else {
+		set HLG_snp_hsauv $value
+		APG_vrb_dispnotif "option $option found; initial Lamport's clock value=$value"
+            }
+	}
+    }
+}
+###############################################################################
+ 
+ 
+### PROCEDURES OF THE MODULE ##################################################
+
+
+### PROCEDURES OF THE MODULE ###########################################
+
+########################################################################
+#-- Procedure ROU_fmt_serialize ---------------------------------------#
+# Allow to serialize list as a string before sending it
+#
+########################################################################
+
+proc ROU_fmt_serialize { paramChaine_aSerialiser } {
+    set SerializeChaine ""
+    foreach route $paramChaine_aSerialiser {
+
+        append SerializeChaine $route "," 
+    }
+    set resultat [regsub "\,$" $SerializeChaine ""]
+    return $resultat
+}
+
+########################################################################
+#-- Procedure ROU_fmt_unserialize -------------------------------------#
+# Allow to unserialize a string to a list before using it
+#
+########################################################################
+
+proc ROU_fmt_unserialize { paramChaine_a_deSerialiser } {
+	set res [split $paramChaine_a_deSerialiser ","]
+	return $res
+}
+########################################################################

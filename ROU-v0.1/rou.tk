@@ -82,6 +82,7 @@ source $PATH/rou-rcv.tk
 source $PATH/rou-svg.tk
 source $PATH/rou-routage.tk
 source $PATH/rou-tab.tk
+source $PATH/rou-fmt.tk
 
 ## Ajout des zones crees, avec option d'affichage
 APG_int_addzone rcv "Réceptions" 1
@@ -116,14 +117,24 @@ proc ROU_start { } {
 # Retour : rien                                                               #
 #-----------------------------------------------------------------------------#
 proc ROU_stop { } {
-		APG_vrb_dispnotif "Stopping ROU" "ROU_stop" 3
+	APG_vrb_dispnotif "Stopping ROU" "ROU_stop" 3
 
     # arret d'une eventuelle sauvegarde en cours
-	  APG_svg_stop
+	APG_svg_stop
 
-		# fin de l'application
-	  exit
+	# fin de l'application
+	exit
 }
 
 ### INITIALISATION DU DEMARRAGE ################################################
 APG_init
+
+set ROU_periodKeepAlive $ROU_rc_periodKeepAlive
+set ROU_periodSendRoutingTable $ROU_rc_periodSendRoutingTable
+
+
+#Start updating routing table each period of time
+ROU_tab_incrTimer $ROU_periodKeepAlive
+
+#Start sending periodicaly my routing table 
+ROU_tab_periodicalSend $ROU_periodSendRoutingTable
