@@ -37,3 +37,5 @@ set ROU_rc_periodKeepAlive 1000
 
 set ROU_rc_periodSendRoutingTable 3000
 
+set ROU_rc_periodDeclareDead 50
+

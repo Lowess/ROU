@@ -13,6 +13,7 @@ exec wish "$0" "$@"
  
 # Current routing table
 set ROU_tab_routingTable $ROU_rc_routingTable
+set ROU_tab_periodDeclareDead $ROU_rc_periodDeclareDead
 
 set ROU_tab_mnemoapp $::ROU_rc_mnemoapp
 set ROU_tab_mnemoTypeMessage $::ROU_rc_mnemoTypeMessage
@@ -139,10 +140,16 @@ proc ROU_tab_incrTimer { period } {
 		}
 		#Modify the route with the incremented timer
 		lset update 3 $newTimer
-		#Get the index of the line
-		set index [lsearch $::ROU_tab_routingTable $route]
-		#Increment the timer and update the table
-		lappend updatedRoutingTable $update
+		
+		#If the timer expires, removes the route
+		if { $newTimer >= $::ROU_tab_periodDeclareDead } {
+			ROU_tab_removeRoute [lindex $route 0]
+		} else {
+			#Get the index of the line
+			set index [lsearch $::ROU_tab_routingTable $route]
+			#Increment the timer and update the table
+			lappend updatedRoutingTable $update	
+		}
 	}
 	#Update the routingTable
 	set ::ROU_tab_routingTable $updatedRoutingTable 
@@ -172,11 +179,10 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 				#Set the distance with a +1
 				set currentDistance [lindex $routeToUpdate 2]
 				
-				
 				#If I have a better route, I update
 				if { $paramDistance < $currentDistance } {
 					#paramDestination == currentDestination
-					set updatedRoute [list $paramDestination]
+					set updatedRoute [list $paramDestination "" "" ""]
 					#Update the next hop
 					lset updatedRoute 1 $app
 					#Update the distance
@@ -187,9 +193,12 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
 				} else {
 					#Otherwise... it resets the timer
-					set updatedRoute $routeToUpdate
-					lset updatedRoute 3 0
-					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute 
+					APG_vrb_dispdebug "#### Current distance = $currentDistance |||| param distance = $paramDistance"
+					if { $currentDistance == $paramDistance } {
+						set updatedRoute $routeToUpdate
+						lset updatedRoute 3 0
+						lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute 
+					}
 				}
 			}
 		}
