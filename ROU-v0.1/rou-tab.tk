@@ -12,8 +12,12 @@ exec wish "$0" "$@"
 ### VARIABLES OF THE MODULE ###################################################
  
 # Current routing table
-set ROU_tab_routingTable $ROU_rc_routingTable
+#<<<<<<< Updated upstream
+#set ROU_tab_routingTable $ROU_rc_routingTable
 
+#=======
+set ROU_tab_routingTable [list [list "a" "b" 1 0] [list "a" "c" 2 0] [list "a" "d" 5 0]]
+#>>>>>>> Stashed changes
 ###############################################################################
 
 ### GRAPHICAL AREA OF THE MODULE ##############################################
@@ -58,7 +62,8 @@ proc ROU_tab_periodicalSend { period } {
 	set msg3 [APG_msg_addmsg msg2 $::ROU_rc_mnemoTableRoutage $serialized]
 	#Send the message
 	ROU_snd_send $msg3 $::APP
-	#Repeat the function each period
+
+	APG_vrb_dispdebug "On est sur $msg3 "
 	after $period ROU_tab_periodicalSend $period
 }
 
