@@ -17,6 +17,11 @@ set ROU_rcv_app $APG_msg_unknown
 set ROU_rcv_mnemoapp $ROU_rc_mnemoapp
 
 set ROU_rcv_mnemoID $ROU_rc_mnemoID
+set ROU_rcv_mnemoTypeMessage $ROU_rc_mnemoTypeMessage
+set ROU_rcv_mnemoTableRoutage $ROU_rc_mnemoTableRoutage
+set ROU_rcv_mnemoDestApp $ROU_rc_mnemoDestApp
+set ROU_rcv_mnemoDestNode $ROU_rc_mnemoDestNode
+set ROU_rcv_mnemoNextHope $ROU_rc_mnemoNextHope
 
 ###############################################################################
 
@@ -72,29 +77,28 @@ proc APG_receive_whatwho { what who } {
     set ::ROU_rcv_msg $what
     set ::ROU_rcv_app $who
 
-
-	#A SUPP
-	#~ APG_vrb_dispdebug "On est sur $::APG_ident $who $what"
-	
 	# Récuperation of the sender and the payload
 	set app [APG_msg_splitstr who $::ROU_rcv_mnemoapp]
 	set msg [APG_msg_endstr what $::ROU_rcv_mnemoapp true]
-	
+
 	# Recuperation of the type of message and the routage table (if exist)
-	set typemsg [APG_msg_splitstr what $::ROU_rc_mnemoTypeMessage]
+	set typemsg [APG_msg_splitstr what $::ROU_rcv_mnemoTypeMessage]
 	set sender [APG_msg_splitstr what $::ROU_rcv_mnemoID]
-	set tableroutage [APG_msg_splitstr what $::ROU_rc_mnemoTableRoutage]
-	
+	set tableroutage [APG_msg_splitstr what $::ROU_rcv_mnemoTableRoutage]
+						
 	# Recuperation of the wanted node (help us to decide if the current node match the nexthope of the
 	# incoming message, if not, we don't do anything, if yes, we look for the next hope)
-	set nodeExpected [APG_msg_splitstr what $::ROU_rc_mnemoNextHope]
+	set nodeExpected [APG_msg_splitstr what $::ROU_rcv_mnemoNextHope]
 
+	#A SUPP
+	APG_vrb_dispdebug "On est sur $::APG_ident typemessage $typemsg"
 
 	# if it's only 2 app ROU who exchange theirs tables
 	if { $typemsg == "routage" } {
 		set table_routage_recu [ROU_fmt_unserialize $tableroutage]
 		# we try to update the existing route (or create some new one)
-		ROU_tab_displayRoutingTable $table_routage_recu								
+		#ROU_tab_displayRoutingTable $table_routage_recu								
+        ROU_tab_displayRoutingTable $table_routage_recu
 
 		ROU_tab_setRoute $sender $table_routage_recu
 
@@ -102,19 +106,18 @@ proc APG_receive_whatwho { what who } {
 		# ROU_tab_setRoute $app $table_routage_recu 
 		ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 
-	# else , it's will be some package to transfert to an other 
-	# node
+		# else , it's will be some package to transfert to an other 
+		# node
 	} else {
-
 		# we extract the destination of the packet
-		set destapp [APG_msg_splitstr what $::ROU_rc_mnemoDestApp]
-		set destnode [APG_msg_splitstr what $::ROU_rc_mnemoDestNode]
+		set destapp [APG_msg_splitstr what $::ROU_rcv_mnemoDestApp]
+		set destnode [APG_msg_splitstr what $::ROU_rcv_mnemoDestNode]
 
 		# the message come from a local application (which doesn't have the mnemo nextHope set yet) 
 		if { $nodeExpected == "-" } {
 			# We set the mnemonique and send the msg to the next node
 			set nextNode [ROU_tab_getRoute $destnode]
-			set nextMessage [APG_msg_addmsg msg $::ROU_rc_mnemoNextHope $destnode]
+			set nextMessage [APG_msg_addmsg msg $::ROU_rcv_mnemoNextHope $destnode]
 			APG_vrb_dispdebug "Viens de l'appli local $::APP Envoi au dest node $destnode"
 			ROU_snd_send $nextMessage $::APG_ident
 		} else {
@@ -135,7 +138,7 @@ proc APG_receive_whatwho { what who } {
 						# runing one the same node but also that only ROU application are connected
 						# between two node (2 local application from different node can't be connected to the same ROU)
 						APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli local" 	
-						
+											
 						ROU_snd_send $msg $::APG_ident
 
 					# else, we are on the good expected node but it's not the one where the message
@@ -148,7 +151,7 @@ proc APG_receive_whatwho { what who } {
 						set nextNode [ROU_tab_getRoute $destnode]
 						ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 						APG_vrb_dispdebug "le nextNode $nextNode"
-						set nextMessage [APG_msg_replaceval msg $::ROU_rc_mnemoNextHope $nextNode]
+						set nextMessage [APG_msg_replaceval msg $::ROU_rcv_mnemoNextHope $nextNode]
 						APG_vrb_dispdebug "le nextMessage $nextMessage "
 
 						ROU_snd_send $nextMessage $::APG_ident
@@ -159,4 +162,3 @@ proc APG_receive_whatwho { what who } {
 		}
 	}
 }
-
