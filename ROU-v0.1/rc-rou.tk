@@ -18,4 +18,6 @@ set ROU_rc_mnemoDestNode "DestNode"
 
 set ROU_rc_mnemoDestApp "DestApp"
 
+set ROU_rc_mnemoNextHope "NextHope"
+
 set ROU_rc_mnemoTableRoutage "TableRoutage"

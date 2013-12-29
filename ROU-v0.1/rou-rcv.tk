@@ -75,79 +75,98 @@ proc ROU_unserialize { paramChaine_a_deSerialiser } {
 #-----------------------------------------------------------------------------#
 proc APG_receive_whatwho { what who } {
 
-		# Mise a jour de l'interface du module rcv.
+	# Mise a jour de l'interface du module rcv.
     set ::ROU_rcv_msg $what
     set ::ROU_rcv_app $who
 
-		# Traitement different selon l'emetteur.
+	# Traitement different selon l'emetteur.
     switch -- $::ROU_rcv_app \
 				$::APP {
 
-						# Récuperation of the receiver and the payload
+						# Récuperation of the sender and the payload
 						set app [APG_msg_splitstr who $::ROU_rcv_mnemoapp]
 						set msg [APG_msg_endstr what $::ROU_rcv_mnemoapp true]
-						#APG_vrb_dispdebug "MSG Test node $::APP $::ROU_rcv_msg $msg"
+						
+						# Recuperation of the type of message and the routage table (if exist)
 						set typemsg [APG_msg_splitstr what $::ROU_rc_mnemoTypeMessage]
 						set tableroutage [APG_msg_splitstr what $::ROU_rc_mnemoTableRoutage]
-
-						#ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 						
-						APG_vrb_dispdebug "test $typemsg"
+						# Recuperation of the wanted node (help us to decide if the current node match the nexthope of the
+						# incoming message, if not, we don't do anything, if yes, we look for the next hope)
+						set nodeExpected [APG_msg_splitstr what $::ROU_rc_mnemoNextHope]
+
+#A SUPP
+						APG_vrb_dispdebug "On est sur $::APP"
+
 						# if it's only 2 app ROU who exchange theirs tables
 						if { $typemsg == "routage" } {
 							set table_routage_recu [ROU_unserialize $tableroutage]
 							# we try to update the existing route (or create some new one)
 							ROU_tab_displayRoutingTable $table_routage_recu								
 
-###### POUR FLO : C'est la que je remarque que ca fait pas tout a fait ce que je pense le setRoute. 
-
 							ROU_tab_setRoute $table_routage_recu
 
 							ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 
-							#set test [ROU_tab_getRoute 
 
 						# else , it's will be some package to transfert to an other 
 						# node
-						#} else { 
+						} else {
+
+							# we extract the destination of the packet
+							set destapp [APG_msg_splitstr what $::ROU_rc_mnemoDestApp]
+							set destnode [APG_msg_splitstr what $::ROU_rc_mnemoDestNode]
+
+							# the message come from a local application (which doesn't have the mnemo nextHope set yet) 
+							if { $nodeExpected == "-" } {
+								# We set the mnemonique and send the msg to the next node
+								set nextNode [ROU_tab_getRoute $destnode]
+								set nextMessage [APG_msg_addmsg msg $::ROU_rc_mnemoNextHope $destnode]
+								APG_vrb_dispdebug "Viens de l'appli local $::APP Envoi au dest node $destnode"
+								ROU_snd_send $nextMessage $::APP
 
 
-##### Pour Flo : la c'est dans le cas ou il s'agit d'un message d'une appli a une autre (autre que de l'echange de table de routage donc)
-							if { $typemsg == "OTHER" } {
-								# we extract the destination of the packet
-								set destapp [APG_msg_splitstr what $::ROU_rc_mnemoDestApp]
-								set destnode [APG_msg_splitstr what $::ROU_rc_mnemoDestNode]
-								# if the destination is the current node.
-								if { $destnode == $::APP } {
+							} else {
 
-##### Pour FLO : J'ai virer les send pour le moment (broadcast storm) mais qui se reglera si on trouve une solution a notre probleme.
+								# else, we look if the nodeExpected match the current node. If not we don't do anything
+								if { $nodeExpected == $::APP } {
+
+										# if yes, we look for the type of message 
+										if { $typemsg == "OTHER" } {
+
+											# if the destination is the current node, thats mean the message is on the right node
+											# but doesn't mean it's on the right application
+											if { $destnode == $::APP } {
+
+												# we send the message to the local application
+												# which can know the msg is for her by looking at the DestApp mnemo.
+												# IMPORTANT: for the moment, we assume there is only one type of application
+												# runing one the same node but also that only ROU application are connected
+												# between two node (2 local application from different node can't be connected to the same ROU)
+												APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli local" 	
+												
+												ROU_snd_send $msg $::APP
+
+											# else, we are on the good expected node but it's not the one where the message
+											# is send (so we looking now for the nexthope)
+											} else {
+
+												APG_vrb_dispdebug "On est pas sur le bon node $::APP dest $destnode"
 
 
-									APG_vrb_dispdebug "On est sur le bon node $::APP" 	
-									#we send the packet to the correct local application
-									#ENVOYER packet
-									#ROU_snd_send $msg $::APP
+												set nextNode [ROU_tab_getRoute $destnode]
+												ROU_tab_displayRoutingTable $::ROU_tab_routingTable
+												APG_vrb_dispdebug "le nextNode $nextNode"
+												set nextMessage [APG_msg_replaceval msg $::ROU_rc_mnemoNextHope $nextNode]
+												APG_vrb_dispdebug "le nextMessage $nextMessage "
 
-								# else, we send it to an other location.
-								} else {
+												ROU_snd_send $nextMessage $::APP
 
-									APG_vrb_dispdebug "On est pas sur le bon node $::APP dest $destnode"
-									#set nextHopeApp [ROU_getRout $dest]
-									#ROU_snd_send $msg $::APP
-
-								}
+											}
+										}
+									}
 							}
-						#}
-				} \
-
-#### A SUPP
-				default {
-						APG_vrb_dispdebug "On est pas sur le bon node test $::APP "
-						# if it's come from a local application
-						# we set the who, with the current app, and send the message
-						set header [APG_msg_createmsg $::ROU_rcv_mnemoapp $who]
-						set msg [APG_msg_concatemsg $header $what]
-						#ROU_snd_send $msg $::APP
+						}
 				}
 }
 
