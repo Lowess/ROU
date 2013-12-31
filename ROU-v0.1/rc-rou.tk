@@ -14,17 +14,17 @@
 # le message transporte.
 set ROU_rc_mnemoapp "approu"
 
-set ROU_rc_mnemoTypeMessage "routage"
+set ROU_rc_mnemoTypeMessage "typeMessage"
 
-set ROU_rc_mnemoDestNode "DestNode"
+set ROU_rc_mnemoDestNode "destNode"
 
-set ROU_rc_mnemoDestApp "DestApp"
+set ROU_rc_mnemoDestApp "destApp"
 
-set ROU_rc_mnemoNextHope "NextHope"
+set ROU_rc_mnemoNextHope "nextHope"
 
-set ROU_rc_mnemoTableRoutage "TableRoutage"
+set ROU_rc_mnemoTableRoutage "tableRoutage"
 
-set ROU_rc_mnemoID "ID"
+set ROU_rc_mnemoID "id"
 
 set ROU_rc_mnemoBroadcast "broadcast"
 
