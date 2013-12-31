@@ -26,6 +26,10 @@ set ROU_rc_mnemoTableRoutage "TableRoutage"
 
 set ROU_rc_mnemoID "ID"
 
+set ROU_rc_mnemoBroadcast "broadcast"
+
+set ROU_rc_mnemoDestinataire "destinataire"
+
 ########################################################################
 # Variables
 ########################################################################

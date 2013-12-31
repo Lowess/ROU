@@ -80,14 +80,14 @@ source $PATH/rc-rou.tk
 source $PATH/rou-snd.tk
 source $PATH/rou-rcv.tk
 source $PATH/rou-svg.tk
-source $PATH/rou-routage.tk
+source $PATH/rou-rms.tk
 source $PATH/rou-tab.tk
 source $PATH/rou-fmt.tk
 
 ## Ajout des zones crees, avec option d'affichage
 APG_int_addzone rcv "Réceptions" 1
 APG_int_addzone snd "Emissions" 1
-APG_int_addzone snap "Snapshoot" 1
+APG_int_addzone rms "Routage" 1
 
 
 ## Affichage des zones
