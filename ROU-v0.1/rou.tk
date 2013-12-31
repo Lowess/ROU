@@ -86,7 +86,6 @@ source $PATH/rou-fmt.tk
 ## Ajout des zones crees, avec option d'affichage
 APG_int_addzone rcv "Réceptions" 1
 APG_int_addzone snd "Emissions" 1
-APG_int_addzone rms "Routage" 1
 
 
 ## Affichage des zones
