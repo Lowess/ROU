@@ -76,11 +76,13 @@ proc ROU_tab_periodicalSend { period } {
 #--------------------------------------------------------------------------------#
 
 proc ROU_tab_displayRoutingTable { paramRoutingTable } {
-	APG_vrb_dispdebug "-----------"
+	 set display "\n-----------\n"
 	foreach route $paramRoutingTable {
-		APG_vrb_dispdebug $route
+		append display $route
+		append display "\n"
 	}
-	APG_vrb_dispdebug "-----------"
+	append display "-----------\n"
+	APG_vrb_dispdebug $display
 }
 
 #-- Procedure ROU_tab_getRoute --------------------------------------------------#
@@ -168,6 +170,7 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 	#Iterates on the remote table
 	foreach updatedRoute $newRoutingTable {
 		set paramDestination [lindex $updatedRoute 0]
+		set paramNextHop [lindex $updatedRoute 1]
 		set paramDistance [lindex $updatedRoute 2]
 		incr paramDistance
 		set flag "false"
@@ -175,7 +178,13 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 		foreach routeToUpdate $::ROU_tab_routingTable {
 			#Check if it's the right route to update
 			if { [lindex $routeToUpdate 0] == $paramDestination } { 
+				#Table6 node4 node7 2
+				#Table7 node4 node4 1
 				set flag "true"
+				
+				#Get the current nextHop
+				set currentNextHop [lindex $routeToUpdate 1]
+				
 				#Set the distance with a +1
 				set currentDistance [lindex $routeToUpdate 2]
 				
@@ -193,7 +202,7 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
 				} else {
 					#Otherwise... it resets the timer
-					if { $currentDistance == $paramDistance } {
+					if { $currentDistance == $paramDistance && $currentNextHop == $app } {
 						set updatedRoute $routeToUpdate
 						lset updatedRoute 3 0
 						lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute 
