@@ -193,7 +193,6 @@ proc ROU_tab_setRoute { app newRoutingTable } {
 					lset ::ROU_tab_routingTable [lsearch $::ROU_tab_routingTable $routeToUpdate] $updatedRoute
 				} else {
 					#Otherwise... it resets the timer
-					APG_vrb_dispdebug "#### Current distance = $currentDistance |||| param distance = $paramDistance"
 					if { $currentDistance == $paramDistance } {
 						set updatedRoute $routeToUpdate
 						lset updatedRoute 3 0

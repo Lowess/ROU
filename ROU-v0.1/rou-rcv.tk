@@ -91,21 +91,18 @@ proc APG_receive_whatwho { what who } {
 	set nodeExpected [APG_msg_splitstr what $::ROU_rcv_mnemoNextHope]
 
 	#A SUPP
-	APG_vrb_dispdebug "On est sur $::APG_ident typemessage $typemsg"
+	APG_vrb_dispdebug "$sender-->$::APG_ident |typemessage:$typemsg|"
 
 	# if it's only 2 app ROU who exchange theirs tables
 	if { $typemsg == "routage" } {
 		set table_routage_recu [ROU_fmt_unserialize $tableroutage]
 		# we try to update the existing route (or create some new one)
 		#ROU_tab_displayRoutingTable $table_routage_recu								
-        ROU_tab_displayRoutingTable $table_routage_recu
+        #ROU_tab_displayRoutingTable $table_routage_recu
 
 		ROU_tab_setRoute $sender $table_routage_recu
 
-		ROU_tab_displayRoutingTable $table_routage_recu
-		# ROU_tab_setRoute $app $table_routage_recu 
 		ROU_tab_displayRoutingTable $::ROU_tab_routingTable
-
 		# else , it's will be some package to transfert to an other 
 		# node
 	} else {
