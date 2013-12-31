@@ -118,12 +118,11 @@ proc APG_receive_whatwho { what who } {
 			APG_vrb_dispdebug "Viens de l'appli local $::APP Envoi au dest node $destnode"
 			ROU_snd_send $nextMessage $::APG_ident
 		} else {
-
 			# else, we look if the nodeExpected match the current node. If not we don't do anything
 			if { $nodeExpected == $::APG_ident } {
 
 				# if yes, we look for the type of message 
-				if { $typemsg == "OTHER" } {
+				if { $typemsg == "message" } {
 
 					# if the destination is the current node, thats mean the message is on the right node
 					# but doesn't mean it's on the right application
