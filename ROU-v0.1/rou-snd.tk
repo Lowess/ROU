@@ -41,6 +41,8 @@ proc ROU_snd_send { what who } {
 		set ::ROU_snd_app $who
 		#APG_vrb_dispdebug "msg envoyer de $::APP vers $who"
 		# Emission proprement dite.
+		APG_vrb_dispdebug "SEND--> $who  ||||  $what"
+			
 		APG_send_whatwho $what $who
 }
 

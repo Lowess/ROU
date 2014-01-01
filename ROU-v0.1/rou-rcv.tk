@@ -91,7 +91,7 @@ proc APG_receive_whatwho { what who } {
 	set nodeExpected [APG_msg_splitstr what $::ROU_rcv_mnemoNextHope]
 
 	#A SUPP
-	APG_vrb_dispdebug "$sender-->$::APG_ident |typemessage:$typemsg|"
+	APG_vrb_dispdebug "$sender-->$::APG_ident | typemessage:$typemsg|"
 
 	# if it's only 2 app ROU who exchange theirs tables
 	if { $typemsg == "routage" } {
@@ -109,14 +109,16 @@ proc APG_receive_whatwho { what who } {
 		# we extract the destination of the packet
 		set destapp [APG_msg_splitstr what $::ROU_rcv_mnemoDestApp]
 		set destnode [APG_msg_splitstr what $::ROU_rcv_mnemoDestNode]
-
+		
+		APG_vrb_dispdebug "type de message != routage: destAPP:$destapp destNode:$destnode nodeExpected:$nodeExpected"
+				
 		# the message come from a local application (which doesn't have the mnemo nextHope set yet) 
 		if { $nodeExpected == "-" } {
 			# We set the mnemonique and send the msg to the next node
 			set nextNode [ROU_tab_getRoute $destnode]
-			set nextMessage [APG_msg_addmsg msg $::ROU_rcv_mnemoNextHope $destnode]
-			APG_vrb_dispdebug "Viens de l'appli local $::APP Envoi au dest node $destnode"
-			ROU_snd_send $nextMessage $::APG_ident
+			set nextMessage [APG_msg_addmsg msg $::ROU_rcv_mnemoNextHope $nextNode]
+			APG_vrb_dispdebug "Viens de l'appli locale $::APP Envoi au dest node $nextNode"
+			ROU_snd_send $nextMessage $::APP
 		} else {
 			# else, we look if the nodeExpected match the current node. If not we don't do anything
 			if { $nodeExpected == $::APG_ident } {
@@ -133,9 +135,9 @@ proc APG_receive_whatwho { what who } {
 						# IMPORTANT: for the moment, we assume there is only one type of application
 						# runing one the same node but also that only ROU application are connected
 						# between two node (2 local application from different node can't be connected to the same ROU)
-						APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli local" 	
+						APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli locale" 	
 											
-						ROU_snd_send $msg $::APG_ident
+						ROU_snd_send $msg $::APP
 
 					# else, we are on the good expected node but it's not the one where the message
 					# is send (so we looking now for the nexthope)
@@ -150,8 +152,7 @@ proc APG_receive_whatwho { what who } {
 						set nextMessage [APG_msg_replaceval msg $::ROU_rcv_mnemoNextHope $nextNode]
 						APG_vrb_dispdebug "le nextMessage $nextMessage "
 
-						ROU_snd_send $nextMessage $::APG_ident
-
+						ROU_snd_send $nextMessage $::APP
 					}
 				}
 			}
