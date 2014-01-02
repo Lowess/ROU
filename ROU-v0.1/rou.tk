@@ -82,6 +82,7 @@ source $PATH/rou-rcv.tk
 source $PATH/rou-svg.tk
 source $PATH/rou-tab.tk
 source $PATH/rou-fmt.tk
+source $PATH/rou-dif.tk
 
 ## Ajout des zones crees, avec option d'affichage
 APG_int_addzone rcv "Réceptions" 1
@@ -136,3 +137,8 @@ ROU_tab_incrTimer $ROU_periodKeepAlive
 
 #Start sending periodicaly my routing table 
 ROU_tab_periodicalSend $ROU_periodSendRoutingTable
+
+################################################################################
+
+#Start sending periodicaly my routing table 
+ROU_dif_incrTimer $ROU_periodTimerMessage
