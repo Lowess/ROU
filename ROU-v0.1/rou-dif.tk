@@ -95,7 +95,7 @@ proc ROU_dif_incrTimer { period } {
 	#Update the routingTable
 	set ::ROU_dif_messagesReceived $updatedMessagesReceived
 	
-	ROU_dif_displayMessagesReceived $::ROU_dif_messagesReceived
+	#~ ROU_dif_displayMessagesReceived $::ROU_dif_messagesReceived
 	
 	after $period ROU_dif_incrTimer $period
 }

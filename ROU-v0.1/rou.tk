@@ -141,7 +141,4 @@ ROU_tab_periodicalSend $ROU_periodSendRoutingTable
 ################################################################################
 
 #Start sending periodicaly my routing table 
-ROU_dif_addMessage "A_0"
-ROU_dif_addMessage "A_0"
-APG_vrb_dispdebug [ROU_dif_messageExists "A_1"]
 ROU_dif_incrTimer $ROU_periodTimerMessage
