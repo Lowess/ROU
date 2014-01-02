@@ -66,6 +66,7 @@ proc ROU_snd_send { what who } {
 
 				APG_send_whatwho $modifiedMessage $who
 			} else {
+				ROU_dif_addMessage $idmsg
 				APG_send_whatwho $what $who
 			}
 		} else {

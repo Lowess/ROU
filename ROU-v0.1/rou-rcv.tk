@@ -131,6 +131,7 @@ proc APG_receive_whatwho { what who } {
 
 				# if it's a broadcast msg ( and we don't already reveived it)
 				if { $brodcastFlag != "-" } {
+					APG_vrb_dispdebug "broad $nodeExpected  apg ident $::APG_ident $::APP envoi a l'appli locale" 
 
 					ROU_snd_send $msg $::APP
 
@@ -155,7 +156,6 @@ proc APG_receive_whatwho { what who } {
 								# between two node (2 local application from different node can't be connected to the same ROU)
 								APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli locale" 	
 												
-								ROU_dif_addMessage $idMessage			
 								ROU_snd_send $msg $::APP
 
 							# else, we are on the good expected node but it's not the one where the message
@@ -169,7 +169,6 @@ proc APG_receive_whatwho { what who } {
 								#APG_vrb_dispdebug "le nextNode $nextNode"
 								set nextMessage [APG_msg_replaceval msg $::ROU_rcv_mnemoNextHope $nextNode]
 								#APG_vrb_dispdebug "le nextMessage $nextMessage "
-								ROU_dif_addMessage $idMessage
 								ROU_snd_send $nextMessage $::APP
 							}
 						}
