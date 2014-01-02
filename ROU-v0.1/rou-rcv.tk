@@ -93,7 +93,6 @@ proc APG_receive_whatwho { what who } {
 
 	set idMessage [APG_msg_splitstr what $::ROU_rc_mnemoID]		
 
-	}
 	#A SUPP
 	#APG_vrb_dispdebug "$sender-->$::APG_ident | typemessage:$typemsg|"
 

@@ -46,12 +46,12 @@ proc ROU_snd_send { what who } {
 		# we look if the msg already have an id set.
 		set idmsg [APG_msg_splitstr what $::ROU_snd_mnemoID]
 		set typeMsg [APG_msg_splitstr what $::ROU_snd_mnemoTypeMessage]
-
 		# if not, we set one	
-		if { $idmsg == "-" } {
 
-			if { typeMsg != "routage"} {
-
+		if { $typeMsg != "routage" } {
+			if { $idmsg == "-" } {
+				APG_vrb_dispdebug "if SEND--> $who  ||||  $what"
+			
 				# we concat the current count with APG-ident, to set an uniq id
 				set separator "_"
 				set ID "$::APG_ident$separator$MsgCount"
