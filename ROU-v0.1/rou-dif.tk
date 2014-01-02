@@ -44,7 +44,25 @@ foreach option $APG_lstargs {
 
 proc ROU_dif_addMessage { ident } {
 	set message [list $ident "0"]
-	lappend ::ROU_dif_messagesReceived $message
+	
+	if { [lsearch $::ROU_dif_messagesReceived $message] == "-1" } {
+		lappend ::ROU_dif_messagesReceived $message
+	}
+}
+
+#-- Procedure ROU_dif_addMessage ------------------------------------------------#
+#
+#--------------------------------------------------------------------------------#
+
+proc ROU_dif_messageExists { ident } {
+	set ret ""
+	set message [list $ident "0"]
+	if { [lsearch $::ROU_dif_messagesReceived $message] == "-1" } {
+		set ret "false"
+	} else {
+		set ret "true"
+	}
+	return $ret
 }
 
 #-- Procedure ROU_dif_incrTimer -------------------------------------------------#
