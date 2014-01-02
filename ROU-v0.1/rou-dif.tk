@@ -1,0 +1,117 @@
+package require math
+#    rou
+#    an airplug compatible program
+#    author: Bertrand Ducourthial AT utc.fr, newapp from NET v0.31
+#    license type: free of charge license for academic and research purpose
+#    see license.txt
+### MODULE ROUTAGE #####################################################
+ 
+### VARIABLES OF THE MODULE ############################################
+
+set ROU_dif_messagesReceived $ROU_rc_messagesReceived
+set ROU_dif_periodPurgeMessage $ROU_rc_periodPurgeMessage
+
+######################################################################## 
+ 
+### GRAPHICAL AREA OF THE MODULE #######################################
+
+########################################################################
+  
+### COMMAND LINE OPTION #######################################################
+foreach option $APG_lstargs {
+    set name [lindex [split $option "="] 0]
+    set value [lindex [split $option "="] 1]
+ 
+    switch -- $name {
+	--hlg-hini {
+	    if { $value == "" } {
+		APG_vrb_dispwarning "option $name found without argument ; ignored"
+	    } else {
+		set HLG_snp_hsauv $value
+		APG_vrb_dispnotif "option $option found; initial Lamport's clock value=$value"
+            }
+	}
+    }
+}
+###############################################################################
+ 
+ 
+### PROCEDURES OF THE MODULE ###########################################
+
+#-- Procedure ROU_dif_addMessage ------------------------------------------------#
+#
+#--------------------------------------------------------------------------------#
+
+proc ROU_dif_addMessage { ident } {
+	set separator "_"
+	set initTimer "0"
+	set message [list $ident$separator$initTimer $initTimer]
+	lappend ::ROU_dif_messagesReceived $message
+}
+
+#-- Procedure ROU_dif_incrTimer -------------------------------------------------#
+#																				 #
+#--------------------------------------------------------------------------------#
+
+proc ROU_dif_incrTimer { period } {
+#Contains the new routing table
+	set updatedMessagesReceived [list ]
+	foreach message $::ROU_dif_messagesReceived {
+		#Get the message 
+		set update $message
+		#Get the current timer
+		set newTimer [lindex $update 1]
+		#Increment the timer
+		incr newTimer
+		#Modify the message with the incremented timer
+		lset update 1 $newTimer
+		
+		#If the timer expires, removes the route
+		if { $newTimer >= $::ROU_dif_periodPurgeMessage } {
+			ROU_dif_purgeMessage [lindex $message 0]
+		} else {
+			#Get the index of the line
+			set index [lsearch $::ROU_dif_messagesReceived $message]
+			#Increment the timer and update the table
+			lappend updatedMessagesReceived $update	
+		}
+	}
+	#Update the routingTable
+	set ::ROU_dif_messagesReceived $updatedMessagesReceived
+	
+	after $period ROU_dif_incrTimer $period
+}
+
+
+#-- Procedure ROU_dif_incrTimer -------------------------------------------------#
+#																				 #
+#--------------------------------------------------------------------------------#
+
+proc ROU_dif_purgeMessage { ident } {
+	foreach message $::ROU_dif_messagesReceived {
+		#Check if it's the given route
+		if { [lindex $message 0] == $ident } { 
+			#Get the index of the line
+			set index [lsearch $::ROU_dif_messagesReceived $message]
+			#Remove the index from the routing table
+			set ::ROU_dif_messagesReceived [lreplace $::ROU_dif_messagesReceived $index $index]
+		}
+	}
+}
+
+
+#-- Procedure ROU_tab_displayRoutingTable ---------------------------------------#
+# Action : display a given messages table                                        #
+# Input  : the messages table to display                                         #
+# Output : nothing                                                               #
+#--------------------------------------------------------------------------------#
+
+proc ROU_dif_displayMessagesReceived { paramMessagesReceived } {
+	 set display "\n-----------\n"
+	foreach message $paramMessagesReceived {
+		append display $message
+		append display "\n"
+	}
+	append display "-----------\n"
+	APG_vrb_dispdebug $display
+}

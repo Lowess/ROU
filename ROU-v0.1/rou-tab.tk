@@ -15,10 +15,10 @@ exec wish "$0" "$@"
 set ROU_tab_routingTable $ROU_rc_routingTable
 set ROU_tab_periodDeclareDead $ROU_rc_periodDeclareDead
 
-set ROU_tab_mnemoapp $::ROU_rc_mnemoapp
-set ROU_tab_mnemoTypeMessage $::ROU_rc_mnemoTypeMessage
-set ROU_tab_mnemoID $::ROU_rc_mnemoID
-set ROU_tab_mnemoTableRoutage $::ROU_rc_mnemoTableRoutage
+set ROU_tab_mnemoapp $ROU_rc_mnemoapp
+set ROU_tab_mnemoTypeMessage $ROU_rc_mnemoTypeMessage
+set ROU_tab_mnemoID $ROU_rc_mnemoID
+set ROU_tab_mnemoTableRoutage $ROU_rc_mnemoTableRoutage
 
 ###############################################################################
 
