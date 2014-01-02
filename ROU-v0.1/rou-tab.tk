@@ -20,6 +20,7 @@ set ROU_tab_mnemoTypeMessage $ROU_rc_mnemoTypeMessage
 set ROU_tab_mnemoID $ROU_rc_mnemoID
 set ROU_tab_mnemoTableRoutage $ROU_rc_mnemoTableRoutage
 
+
 ###############################################################################
 
 ### GRAPHICAL AREA OF THE MODULE ##############################################
@@ -65,6 +66,7 @@ proc ROU_tab_periodicalSend { period } {
 	set msg4 [APG_msg_addmsg msg3 $::ROU_tab_mnemoTableRoutage $serialized]
 	#Send the message
 	ROU_snd_send $msg4 $::APP
+
 
 	after $period ROU_tab_periodicalSend $period
 }

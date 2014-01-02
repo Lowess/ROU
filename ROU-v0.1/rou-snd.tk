@@ -8,6 +8,9 @@
 ### VARIABLES DU MODULE #######################################################
 set ROU_snd_msg $APG_msg_unknown
 set ROU_snd_app $APG_msg_unknown
+set MsgCount 0
+set ROU_snd_mnemoID $ROU_rc_mnemoID
+set ROU_snd_mnemoTypeMessage $ROU_rc_mnemoTypeMessage
 ###############################################################################
 
 
@@ -35,15 +38,40 @@ pack .snd.msg .snd.app -side left -fill y -pady 2
 # Retour : rien                                                               #
 #-----------------------------------------------------------------------------#
 proc ROU_snd_send { what who } {
-
+		
 		# Mise a jour de l'interface du module snd.
 		set ::ROU_snd_msg $what
 		set ::ROU_snd_app $who
-		#APG_vrb_dispdebug "msg envoyer de $::APP vers $who"
-		# Emission proprement dite.
-		APG_vrb_dispdebug "SEND--> $who  ||||  $what"
-			
-		APG_send_whatwho $what $who
+		
+		# we look if the msg already have an id set.
+		set idmsg [APG_msg_splitstr what $::ROU_snd_mnemoID]
+		set typeMsg [APG_msg_splitstr what $::ROU_snd_mnemoTypeMessage]
+
+		# if not, we set one	
+		if { $idmsg == "-" } {
+
+			if { typeMsg != "routage"} {
+
+				# we concat the current count with APG-ident, to set an uniq id
+				set separator "_"
+				set ID "$::APG_ident$separator$MsgCount"
+				set modifiedMessage [APG_msg_addmsg what $::ROU_snd_mnemoID $ID]
+
+				# we increment the current message MsgCount
+				incr MsgCount
+
+				APG_vrb_dispdebug "SEND--> $who  ||||  $what"
+
+				[ROU_dif_addMessage $ID]
+
+				APG_send_whatwho $modifiedMessage $who
+			} else {
+				APG_send_whatwho $what $who
+			}
+		} else {
+			APG_send_whatwho $what $who
+		}
+		
 }
 
 ###############################################################################

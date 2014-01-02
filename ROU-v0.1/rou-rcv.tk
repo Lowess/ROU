@@ -76,6 +76,7 @@ proc APG_receive_whatwho { what who } {
 	# Mise a jour de l'interface du module rcv.
     set ::ROU_rcv_msg $what
     set ::ROU_rcv_app $who
+    
 
 	# Récuperation of the sender and the payload
 	set app [APG_msg_splitstr who $::ROU_rcv_mnemoapp]
@@ -90,8 +91,11 @@ proc APG_receive_whatwho { what who } {
 	# incoming message, if not, we don't do anything, if yes, we look for the next hope)
 	set nodeExpected [APG_msg_splitstr what $::ROU_rcv_mnemoNextHope]
 
+	set idMessage [APG_msg_splitstr what $::ROU_rc_mnemoID]		
+
+	}
 	#A SUPP
-	APG_vrb_dispdebug "$sender-->$::APG_ident | typemessage:$typemsg|"
+	#APG_vrb_dispdebug "$sender-->$::APG_ident | typemessage:$typemsg|"
 
 	# if it's only 2 app ROU who exchange theirs tables
 	if { $typemsg == "routage" } {
@@ -102,57 +106,74 @@ proc APG_receive_whatwho { what who } {
 
 		ROU_tab_setRoute $sender $table_routage_recu
 
-		ROU_tab_displayRoutingTable $::ROU_tab_routingTable
+		#ROU_tab_displayRoutingTable $::ROU_tab_routingTable
 		# else , it's will be some package to transfert to an other 
 		# node
 	} else {
-		# we extract the destination of the packet
-		set destapp [APG_msg_splitstr what $::ROU_rcv_mnemoDestApp]
-		set destnode [APG_msg_splitstr what $::ROU_rcv_mnemoDestNode]
-		
-		APG_vrb_dispdebug "type de message != routage: destAPP:$destapp destNode:$destnode nodeExpected:$nodeExpected"
-				
-		# the message come from a local application (which doesn't have the mnemo nextHope set yet) 
-		if { $nodeExpected == "-" } {
-			# We set the mnemonique and send the msg to the next node
-			set nextNode [ROU_tab_getRoute $destnode]
-			set nextMessage [APG_msg_addmsg msg $::ROU_rcv_mnemoNextHope $nextNode]
-			APG_vrb_dispdebug "Viens de l'appli locale $::APP Envoi au dest node $nextNode"
-			ROU_snd_send $nextMessage $::APP
-		} else {
-			# else, we look if the nodeExpected match the current node. If not we don't do anything
-			if { $nodeExpected == $::APG_ident } {
+		# if the message id is already set (mean it's come from an remote application)
+		if { $idMessage != "-" } { 
 
-				# if yes, we look for the type of message 
-				if { $typemsg == "message" } {
-
-					# if the destination is the current node, thats mean the message is on the right node
-					# but doesn't mean it's on the right application
-					if { $destnode == $::APG_ident } {
-
-						# we send the message to the local application
-						# which can know the msg is for her by looking at the DestApp mnemo.
-						# IMPORTANT: for the moment, we assume there is only one type of application
-						# runing one the same node but also that only ROU application are connected
-						# between two node (2 local application from different node can't be connected to the same ROU)
-						APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli locale" 	
-											
-						ROU_snd_send $msg $::APP
-
-					# else, we are on the good expected node but it's not the one where the message
-					# is send (so we looking now for the nexthope)
-					} else {
-
-						APG_vrb_dispdebug "On est pas sur le bon node $::APP dest $destnode"
+			# if the message doesn't exist in the local base
+			if { [ROU_dif_messageExists] != true } {
+				# we add it and continue the normal behavior
+				# else, we do nothing
+				[ROU_dif_addMessage $ID]
 
 
-						set nextNode [ROU_tab_getRoute $destnode]
-						ROU_tab_displayRoutingTable $::ROU_tab_routingTable
-						APG_vrb_dispdebug "le nextNode $nextNode"
-						set nextMessage [APG_msg_replaceval msg $::ROU_rcv_mnemoNextHope $nextNode]
-						APG_vrb_dispdebug "le nextMessage $nextMessage "
+				# we extract the destination of the packet
+				set destapp [APG_msg_splitstr what $::ROU_rcv_mnemoDestApp]
+				set destnode [APG_msg_splitstr what $::ROU_rcv_mnemoDestNode]
+					
+					#APG_vrb_dispdebug "type de message != routage: destAPP:$destapp destNode:$destnode nodeExpected:$nodeExpected"
+							
+				# the message come from a local application (which doesn't have the mnemo nextHope set yet) 
+				if { $nodeExpected == "-" } {
+					# We set the mnemonique and send the msg to the next node
 
-						ROU_snd_send $nextMessage $::APP
+					set nextNode [ROU_tab_getRoute $destnode]
+					set nextMessage [APG_msg_addmsg msg $::ROU_rcv_mnemoNextHope $nextNode]
+					ROU_tab_displayRoutingTable $::ROU_tab_routingTable
+						#APG_vrb_dispdebug "Vie $destnode    ns $nextNode de l'appli local $nextMessage" 
+						#APG_vrb_dispdebug "Viens de l'appli locale $::APP Envoi au dest node $nextNode"
+					ROU_snd_send $nextMessage $::APP
+				} else {
+					# else, we look if the nodeExpected match the current node. If not we don't do anything
+						#APG_vrb_dispdebug "On est sur le bon nodeexpecter $nodeExpected  apg ident $::APG_ident $::APP envoi a l'appli locale" 
+
+					if { $nodeExpected == $::APG_ident } {
+
+						# if yes, we look for the type of message 
+						if { $typemsg == "message" } {
+							#APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli locale" 
+							# if the destination is the current node, thats mean the message is on the right node
+							# but doesn't mean it's on the right application
+							if { $destnode == $::APG_ident } {
+
+								# we send the message to the local application
+								# which can know the msg is for her by looking at the DestApp mnemo.
+								# IMPORTANT: for the moment, we assume there is only one type of application
+								# runing one the same node but also that only ROU application are connected
+								# between two node (2 local application from different node can't be connected to the same ROU)
+								APG_vrb_dispdebug "On est sur le bon node $::APP envoi a l'appli locale" 	
+														
+								ROU_snd_send $msg $::APP
+
+							# else, we are on the good expected node but it's not the one where the message
+							# is send (so we looking now for the nexthope)
+							} else {
+
+								#APG_vrb_dispdebug "On est pas sur le bon node $::APP dest $destnode"
+
+
+								set nextNode [ROU_tab_getRoute $destnode]
+								ROU_tab_displayRoutingTable $::ROU_tab_routingTable
+								#APG_vrb_dispdebug "le nextNode $nextNode"
+								set nextMessage [APG_msg_replaceval msg $::ROU_rcv_mnemoNextHope $nextNode]
+								#APG_vrb_dispdebug "le nextMessage $nextMessage "
+
+								ROU_snd_send $nextMessage $::APP
+							}
+						}
 					}
 				}
 			}
