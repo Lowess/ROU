@@ -43,9 +43,7 @@ foreach option $APG_lstargs {
 #--------------------------------------------------------------------------------#
 
 proc ROU_dif_addMessage { ident } {
-	set separator "_"
-	set initTimer "0"
-	set message [list $ident$separator$initTimer $initTimer]
+	set message [list $ident "0"]
 	lappend ::ROU_dif_messagesReceived $message
 }
 
@@ -78,6 +76,8 @@ proc ROU_dif_incrTimer { period } {
 	}
 	#Update the routingTable
 	set ::ROU_dif_messagesReceived $updatedMessagesReceived
+	
+	ROU_dif_displayMessagesReceived $::ROU_dif_messagesReceived
 	
 	after $period ROU_dif_incrTimer $period
 }
